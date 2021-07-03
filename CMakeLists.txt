@@ -117,7 +117,7 @@ ADD_LIBRARY(${fdt_lib_name} ${fdt_source_files} ${INSTALLHEADER_FILES})
 # Generate export header
 GENERATE_EXPORT_HEADER(${fdt_lib_name})
 string(TOLOWER ${fdt_lib_name} LOWER_PROJECT_NAME)
-set(INSTALLHEADER_FILES ${INSTALLHEADER_FILES} 
+set(INSTALLHEADER_FILES ${INSTALLHEADER_FILES}
     ${CMAKE_CURRENT_BINARY_DIR}/${LOWER_PROJECT_NAME}_export.h)
 file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${LOWER_PROJECT_NAME}_export.h
     DESTINATION ${CMAKE_BINARY_DIR})
@@ -161,7 +161,10 @@ if (DEMO)
 
     add_executable(detect-camera-demo ${fdt_base_dir}/example/detect-camera.cpp)
     target_link_libraries(detect-camera-demo ${fdt_lib_name} ${OpenCV_LIBS})
-    
+
+    add_executable(detect-camera-tcp-msgpack-demo ${fdt_base_dir}/example/detect-camera-tcp-msgpack.cpp)
+    target_link_libraries(detect-camera-tcp-msgpack-demo ${fdt_lib_name} ${OpenCV_LIBS})
+
     add_executable(benchmark ${fdt_base_dir}/example/benchmark.cpp)
     target_link_libraries(benchmark ${fdt_lib_name} ${OpenCV_LIBS})
 endif()
