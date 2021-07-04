@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-	int * pResults = NULL; 
+	int * pResults = NULL;
     //pBuffer is used in the detection functions.
     //If you call functions in multiple threads, please create one buffer for each thread!
     unsigned char * pBuffer = (unsigned char *)malloc(DETECT_BUFFER_SIZE);
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 
     VideoCapture cap;
     Mat im;
-    
+
     if( isdigit(argv[1][0]))
     {
         cap.open(argv[1][0]-'0');
@@ -74,6 +74,8 @@ int main(int argc, char* argv[])
             cerr << "Cannot open the camera." << endl;
             return 0;
         }
+        cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+        cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
     }
 
     if( cap.isOpened())
@@ -82,10 +84,14 @@ int main(int argc, char* argv[])
         {
             cap >> im;
             //cout << "Image size: " << im.rows << "X" << im.cols << endl;
-            Mat image = im.clone();
+              int startX=(640-480)/2,startY=0,width=480,height=480;
+            Mat ROI(im, Rect(startX,startY,width,height));
+            Mat image;
+
+            ROI.copyTo(image);
 
             ///////////////////////////////////////////
-            // CNN face detection 
+            // CNN face detection
             // Best detection rate
             //////////////////////////////////////////
             //!!! The input image must be a BGR one (three-channel) instead of RGB
@@ -94,10 +100,10 @@ int main(int argc, char* argv[])
             cvtm.start();
 
             pResults = facedetect_cnn(pBuffer, (unsigned char*)(image.ptr(0)), image.cols, image.rows, (int)image.step);
-            
-            cvtm.stop();    
+
+            cvtm.stop();
             printf("time = %gms\n", cvtm.getTimeMilli());
-            
+
             printf("%d faces detected.\n", (pResults ? *pResults : 0));
             Mat result_image = image.clone();
             //print the detection results
@@ -109,12 +115,12 @@ int main(int argc, char* argv[])
                 int y = p[2];
                 int w = p[3];
                 int h = p[4];
-                
+
                 //show the score of the face. Its range is [0-100]
                 char sScore[256];
                 snprintf(sScore, 256, "%d", confidence);
-                cv::putText(result_image, sScore, cv::Point(x, y-3), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 1);       
-                
+                cv::putText(result_image, sScore, cv::Point(x, y-3), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 1);
+
                 //draw face rectangle
                 rectangle(result_image, Rect(x, y, w, h), Scalar(0, 255, 0), 2);
                 //draw five face landmarks in different colors
@@ -123,21 +129,21 @@ int main(int argc, char* argv[])
                 cv::circle(result_image, cv::Point(p[5 + 4], p[5 + 5]), 1, cv::Scalar(0, 255, 0), 2);
                 cv::circle(result_image, cv::Point(p[5 + 6], p[5 + 7]), 1, cv::Scalar(255, 0, 255), 2);
                 cv::circle(result_image, cv::Point(p[5 + 8], p[5 + 9]), 1, cv::Scalar(0, 255, 255), 2);
-                
+
                 //print the result
-                printf("face %d: confidence=%d, [%d, %d, %d, %d] (%d,%d) (%d,%d) (%d,%d) (%d,%d) (%d,%d)\n", 
-                        i, confidence, x, y, w, h, 
+                printf("face %d: confidence=%d, [%d, %d, %d, %d] (%d,%d) (%d,%d) (%d,%d) (%d,%d) (%d,%d)\n",
+                        i, confidence, x, y, w, h,
                         p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13],p[14]);
 
             }
             imshow("result", result_image);
-            
+
             if((cv::waitKey(2)& 0xFF) == 'q')
                 break;
         }
     }
-   
-	
+
+
 
 
     //release the buffer

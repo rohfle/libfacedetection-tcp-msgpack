@@ -103,6 +103,8 @@ int main(int argc, char* argv[])
             cerr << "Cannot open the camera." << endl;
             return 0;
         }
+        cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+        cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
     }
 
     if( cap.isOpened())
@@ -111,8 +113,12 @@ int main(int argc, char* argv[])
         {
             cap >> im;
             //cout << "Image size: " << im.rows << "X" << im.cols << endl;
-            Mat image = im.clone();
+            // RESIZING TO 480x480
+              int startX=(640-480)/2,startY=0,width=480,height=480;
+            Mat ROI(im, Rect(startX,startY,width,height));
+            Mat image;
 
+            ROI.copyTo(image);
             ///////////////////////////////////////////
             // CNN face detection
             // Best detection rate
@@ -218,7 +224,7 @@ int main(int argc, char* argv[])
                 connected = false;
             }
             /// END CODE CHUNK
-            // imshow("result", result_image);
+            imshow("result", result_image);
         }
     }
 
